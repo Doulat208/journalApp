@@ -33,8 +33,8 @@ public class JournalEntryService {
     public JournalEntry updateEntry(ObjectId myId, JournalEntry myEntry){
         JournalEntry old = journalEntryRepository.findById(myId).orElse(null);
         if(old != null){
-            old.setTitle(myEntry.getTitle()) ;
-            old.setContent(myEntry.getContent());
+            old.setTitle(myEntry.getTitle() != null && myEntry.getTitle() != "" ? myEntry.getTitle() : old.getTitle()) ;
+            old.setContent(myEntry.getContent() != null && myEntry.getContent() != "" ? myEntry.getContent() :old.getContent());
             old = journalEntryRepository.save(old);
         }
         return old;
