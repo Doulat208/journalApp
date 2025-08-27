@@ -1,12 +1,15 @@
 package com.myspringboot.journalApp.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.myspringboot.journalApp.Entity.JournalEntry;
+import com.myspringboot.journalApp.Entity.User;
 import com.myspringboot.journalApp.Repository.JournalEntryRepository;
 
 @Service
@@ -16,10 +19,25 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
-    public JournalEntry saveEntry(JournalEntry myEntry){
-        // myEntry.setDate(LocalDateTime.now());
+    @Autowired
+    private UserService userService;
+
+    @Transactional
+    public void saveEntry(JournalEntry myEntry, String userName){
+        try{
+            User user = userService.findByUserName(userName);
+            myEntry.setDate(LocalDateTime.now());
+            JournalEntry saved = journalEntryRepository.save(myEntry);
+            user.getJournalEntries().add(saved);
+            // user.setUserName(null);
+            userService.saveUser(user);
+        }catch(Exception e){
+            throw new RuntimeException("An error occured while saving the entry.");
+        }
+    }
+
+    public void saveEntry(JournalEntry myEntry){
         journalEntryRepository.save(myEntry);
-        return myEntry;
     }
 
     public List<JournalEntry> getAll(){
@@ -40,10 +58,15 @@ public class JournalEntryService {
         return old;
     }
 
-    public JournalEntry deleteById(ObjectId myId){
-        JournalEntry temp = journalEntryRepository.findById(myId).orElse(null);
-        if(temp != null)
+    @Transactional
+    public void deleteById(ObjectId myId, String userName){
+        try{
+            User user = userService.findByUserName(userName);
+            user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+            userService.saveUser(user);
             journalEntryRepository.deleteById(myId);
-        return temp;
+        }catch (Exception e){
+            throw new RuntimeException("An error occur while deleting entries.");
+        }
     }
 }
