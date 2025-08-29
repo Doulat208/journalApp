@@ -45,12 +45,13 @@ public class JournalEntryController {
     }
 
     @PostMapping("/{userName}")
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry, @PathVariable String userName){
-        try{
+    public ResponseEntity<String> createEntry(@RequestBody JournalEntry myEntry, @PathVariable String userName){
+        try {          
             journalEntryService.saveEntry(myEntry, userName);
-            return ResponseEntity.status(HttpStatus.OK).body(myEntry);
-        }catch(Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.status(HttpStatus.CREATED).body("Journal entry created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error creating journal entry: " + e.getMessage());
         }
     }
 

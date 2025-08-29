@@ -1,6 +1,7 @@
 package com.myspringboot.journalApp.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -23,16 +24,16 @@ public class JournalEntryService {
     private UserService userService;
 
     @Transactional
-    public void saveEntry(JournalEntry myEntry, String userName){
-        try{
-            User user = userService.findByUserName(userName);
-            myEntry.setDate(LocalDateTime.now());
+    public void saveEntry(JournalEntry myEntry, String userName) {
+        try {
+            User user = userService.findByUserName(userName);            
+            LocalDateTime now = LocalDateTime.now();
+            myEntry.setDate(now);
             JournalEntry saved = journalEntryRepository.save(myEntry);
             user.getJournalEntries().add(saved);
-            // user.setUserName(null);
             userService.saveUser(user);
-        }catch(Exception e){
-            throw new RuntimeException("An error occured while saving the entry.");
+        } catch (Exception e) {
+            throw new RuntimeException("An error occurred while saving the journal entry: " + e.getMessage(), e);
         }
     }
 
