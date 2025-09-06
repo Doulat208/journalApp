@@ -1,7 +1,6 @@
 package com.myspringboot.journalApp.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -63,11 +62,15 @@ public class JournalEntryService {
     public void deleteById(ObjectId myId, String userName){
         try{
             User user = userService.findByUserName(userName);
-            user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
-            userService.saveUser(user);
-            journalEntryRepository.deleteById(myId);
+            boolean removed = user.getJournalEntries().removeIf(x -> x.getId().equals(myId));
+            if(removed){
+                userService.saveUser(user);
+                journalEntryRepository.deleteById(myId);
+            }
         }catch (Exception e){
             throw new RuntimeException("An error occur while deleting entries.");
         }
     }
+
+
 }
